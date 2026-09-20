@@ -127,15 +127,32 @@
     box-shadow:0 30px 60px -30px rgba(0,0,0,.6);
   }
   .term-bar{
-    display:flex; align-items:center; gap:7px;
+    display:flex; align-items:center;
     padding:10px 14px;
     background:var(--panel-2);
     border-bottom:1px solid var(--line);
+    gap:14px;
   }
-  .term-bar span{ width:9px; height:9px; border-radius:50%; background:#3a4155; display:inline-block; }
+  .term-bar .dots{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    flex:none;
+  }
+  .term-bar .dots i{
+    width:9px; height:9px;
+    border-radius:50%;
+    background:#3a4155;
+    display:block;
+  }
   .term-bar .title{
-    font-family:var(--mono); font-size:12px; color:var(--text-dim);
-    margin-left:8px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    min-width:0;
   }
   .term pre{
     margin:0;
@@ -146,6 +163,7 @@
     color:#c7cede;
     overflow-x:auto;
     white-space:pre-wrap;
+    word-break:break-word;
   }
   .term .ok{ color:#7fd99a; }
   .term .deny{ color:var(--red); }
@@ -187,8 +205,7 @@
     text-align:center;
     padding:32px;
   }
-  .placeholder::before, .placeholder::after,
-  .placeholder .corner-tl, .placeholder .corner-br{
+  .placeholder::before, .placeholder::after{
     content:"";
     position:absolute;
     width:18px; height:18px;
@@ -206,7 +223,7 @@
   }
   .placeholder .ph-label b{ color:var(--text); display:block; margin-bottom:6px; font-weight:600; }
 
-  /* ---------- proof list (numbered, it's a real sequence) ---------- */
+  /* ---------- proof list ---------- */
   .proof{ border-top:1px solid var(--line); }
   .proof-row{
     display:grid;
@@ -294,7 +311,7 @@
 
       <div class="term" aria-label="Terminal output demonstrating policy enforcement and tamper detection">
         <div class="term-bar">
-          <span></span><span></span><span></span>
+          <span class="dots"><i></i><i></i><i></i></span>
           <span class="title">zero-trust-aks — live checks</span>
         </div>
         <pre><span class="prompt">$</span> <span class="cmd">kubectl run bad-pod --image=nginx --dry-run=server</span>
@@ -474,8 +491,6 @@ aks-system-12345678-1     Ready    &lt;none&gt;</span><span class="caret"></span
   </footer>
 
 <script>
-  // Respect reduced-motion: skip the typing reveal entirely, content is
-  // already fully present in the DOM either way (no motion-dependent info).
   document.documentElement.classList.add('js');
 </script>
 </body>
