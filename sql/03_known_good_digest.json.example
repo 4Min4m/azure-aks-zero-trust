@@ -1,0 +1,7 @@
+{
+  "database_name": "payments-audit-ledger",
+  "block_id": 0,
+  "hash": "0xPASTE_THE_REAL_HASH_FROM_STEP_02_HERE",
+  "last_transaction_commit_time": "2026-01-01T00:00:00.0000000",
+  "digest_time": "2026-01-01T00:00:00.0000000"
+}
