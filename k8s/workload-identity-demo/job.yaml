@@ -1,0 +1,57 @@
+# One-shot Job proving passwordless PaaS access: lists (and reads) blobs in
+# the audit-exports container using ONLY the federated Workload Identity
+# token — no account key, no connection string, no Kubernetes Secret at
+# all. This is the concrete artifact for Phase 1 item 3 ("replacing any
+# static credentials/connection strings currently used").
+#
+# Run and check with (via `az aks command invoke`, see docs/access.md):
+#   kubectl apply -f k8s/workload-identity-demo/
+#   kubectl wait --for=condition=complete job/blob-access-proof -n workload-identity-demo --timeout=120s
+#   kubectl logs job/blob-access-proof -n workload-identity-demo
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: blob-access-proof
+  namespace: workload-identity-demo
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: blob-reader
+      restartPolicy: Never
+      containers:
+        - name: az-cli
+          image: mcr.microsoft.com/azure-cli:2.65.0
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              echo "Authenticating with the federated Workload Identity token (no secrets used)..."
+              az login --identity --federated-token "$(cat "$AZURE_FEDERATED_TOKEN_FILE")" \
+                --client-id "$AZURE_CLIENT_ID" --tenant-id "$AZURE_TENANT_ID" >/dev/null
+              echo "Listing blobs in audit-exports using only the AAD token:"
+              az storage blob list \
+                --account-name "$STORAGE_ACCOUNT_NAME" \
+                --container-name "audit-exports" \
+                --auth-mode login \
+                --output table
+          env:
+            - name: STORAGE_ACCOUNT_NAME
+              value: "<PASTE terraform output storage_account_name HERE>"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
