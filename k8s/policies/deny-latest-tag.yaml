@@ -1,0 +1,58 @@
+# Custom Gatekeeper rule: no container may use the `:latest` tag (or omit a
+# tag entirely, which resolves to `:latest`). This is the one Kyverno-side
+# rule from the AWS project with no built-in Azure Policy equivalent, so it
+# is applied directly with kubectl against the Gatekeeper the Azure Policy
+# Add-on already installed — NOT through an azurerm_resource_policy_assignment.
+#
+# Apply with (via `az aks command invoke`, since the cluster is private —
+# see docs/access.md):
+#   kubectl apply -f k8s/policies/deny-latest-tag.yaml
+#
+# Verify with:
+#   kubectl run bad-pod --image=nginx --dry-run=server
+#   -> denied: "nginx" resolves to the :latest tag, which is not allowed
+---
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: denylatesttag
+spec:
+  crd:
+    spec:
+      names:
+        kind: DenyLatestTag
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package denylatesttag
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          not contains_valid_tag(container.image)
+          msg := sprintf("container <%v> uses image <%v>, which resolves to the :latest tag or has no tag at all — pin an explicit version", [container.name, container.image])
+        }
+
+        contains_valid_tag(image) {
+          contains(image, "@sha256:")
+        }
+
+        contains_valid_tag(image) {
+          parts := split(image, ":")
+          count(parts) > 1
+          tag := parts[count(parts) - 1]
+          tag != "latest"
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: DenyLatestTag
+metadata:
+  name: deny-latest-tag
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - azure-arc
