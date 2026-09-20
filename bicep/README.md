@@ -1,4 +1,4 @@
-# Bicep parity (Phase 3 — scoped subset)
+# Bicep parity
 
 This directory re-implements **only the networking + AKS cluster** shell
 from `terraform/` in Bicep — not the SQL Ledger, Storage Account, Key
