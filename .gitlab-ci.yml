@@ -1,0 +1,144 @@
+stages:
+  - validate
+  - infrastructure
+  - deploy
+  - test
+  - destroy
+
+variables:
+  TF_VAR_environment: "demo"
+  ARM_USE_OIDC: "true" # GitLab OIDC -> Azure federated credential, no static client secret in CI
+
+image: mcr.microsoft.com/azure-cli:2.65.0
+
+.setup_azure_login: &setup_azure_login |
+  az login --service-principal \
+    --username "$AZURE_CLIENT_ID" \
+    --tenant "$AZURE_TENANT_ID" \
+    --federated-token "$(cat "$CI_JOB_JWT_FILE" 2>/dev/null || echo "$AZURE_FEDERATED_TOKEN")" \
+    2>/dev/null || az login --service-principal -u "$AZURE_CLIENT_ID" -p "$AZURE_CLIENT_SECRET" --tenant "$AZURE_TENANT_ID"
+  az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+
+.setup_terraform: &setup_terraform |
+  TF_VERSION="1.9.8"
+  curl -sLO "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip"
+  unzip -oq "terraform_${TF_VERSION}_linux_amd64.zip" -d /usr/local/bin/
+  az extension add --name aks-preview --only-show-errors || true
+
+validate_terraform:
+  stage: validate
+  when: manual
+  before_script:
+    - *setup_azure_login
+    - *setup_terraform
+  script:
+    - cd terraform
+    - terraform init -backend-config="resource_group_name=$TFSTATE_RG" -backend-config="storage_account_name=$TFSTATE_SA" -backend-config="container_name=tfstate" -backend-config="key=zero-trust-aks.tfstate"
+    - terraform validate
+    - terraform plan -out=plan.tfplan
+  artifacts:
+    paths:
+      - terraform/plan.tfplan
+    expire_in: 1 hour
+  only:
+    - main
+    - merge_requests
+
+deploy_infrastructure:
+  stage: infrastructure
+  when: manual
+  before_script:
+    - *setup_azure_login
+    - *setup_terraform
+  script:
+    - cd terraform
+    - terraform init -backend-config="resource_group_name=$TFSTATE_RG" -backend-config="storage_account_name=$TFSTATE_SA" -backend-config="container_name=tfstate" -backend-config="key=zero-trust-aks.tfstate"
+    - terraform apply -input=false plan.tfplan
+  dependencies:
+    - validate_terraform
+  only:
+    - main
+
+deploy_k8s_baseline:
+  stage: deploy
+  when: manual
+  before_script:
+    - *setup_azure_login
+  script:
+    - export AKS_RESOURCE_GROUP=$(cd terraform && terraform output -raw resource_group_name)
+    - export AKS_CLUSTER_NAME=$(cd terraform && terraform output -raw aks_cluster_name)
+    - ./scripts/aks-invoke.sh "kubectl apply -f k8s/storage-class-premium.yaml -f k8s/policies/"
+  dependencies:
+    - deploy_infrastructure
+  only:
+    - main
+
+deploy_mysql:
+  stage: deploy
+  before_script:
+    - *setup_azure_login
+  script:
+    - export AKS_RESOURCE_GROUP=$(cd terraform && terraform output -raw resource_group_name)
+    - export AKS_CLUSTER_NAME=$(cd terraform && terraform output -raw aks_cluster_name)
+    - KV_NAME=$(cd terraform && terraform output -raw key_vault_name)
+    - MYSQL_ROOT_PASSWORD=$(az keyvault secret show --vault-name "$KV_NAME" --name mysql-admin-password --query value -o tsv)
+    - ./scripts/aks-invoke.sh "helm repo add bitnami https://charts.bitnami.com/bitnami && helm repo update && helm upgrade --install mysql bitnami/mysql -n data --create-namespace --values helm/mysql/values.yaml --set auth.rootPassword=${MYSQL_ROOT_PASSWORD} --set auth.password=${MYSQL_ROOT_PASSWORD} --wait --timeout=5m" helm/mysql
+  dependencies:
+    - deploy_k8s_baseline
+  only:
+    - main
+
+deploy_app:
+  stage: deploy
+  before_script:
+    - *setup_azure_login
+  script:
+    - export AKS_RESOURCE_GROUP=$(cd terraform && terraform output -raw resource_group_name)
+    - export AKS_CLUSTER_NAME=$(cd terraform && terraform output -raw aks_cluster_name)
+    - ./scripts/aks-invoke.sh "helm upgrade --install nginx-app helm/nginx --namespace apps --create-namespace --wait --timeout=5m" helm/nginx
+  dependencies:
+    - deploy_mysql
+  only:
+    - main
+
+smoke_tests:
+  stage: test
+  before_script:
+    - *setup_azure_login
+  script:
+    - export AKS_RESOURCE_GROUP=$(cd terraform && terraform output -raw resource_group_name)
+    - export AKS_CLUSTER_NAME=$(cd terraform && terraform output -raw aks_cluster_name)
+    - ./scripts/aks-invoke.sh "kubectl get pods -n data && kubectl get pods -n apps && kubectl get pvc -A && kubectl get svc -A"
+    - ./scripts/aks-invoke.sh "kubectl run policy-check --image=nginx --restart=Never --dry-run=server" # expect this to be DENIED by the allowed-images/deny-latest-tag policies — smoke test that policy enforcement is actually live
+  dependencies:
+    - deploy_app
+  only:
+    - main
+
+cleanup_k8s_resources:
+  stage: destroy
+  when: manual
+  before_script:
+    - *setup_azure_login
+  script:
+    - export AKS_RESOURCE_GROUP=$(cd terraform && terraform output -raw resource_group_name)
+    - export AKS_CLUSTER_NAME=$(cd terraform && terraform output -raw aks_cluster_name)
+    - ./scripts/aks-invoke.sh "helm uninstall nginx-app -n apps || true"
+    - ./scripts/aks-invoke.sh "helm uninstall mysql -n data || true"
+  only:
+    - main
+
+destroy_infrastructure:
+  stage: destroy
+  when: manual
+  before_script:
+    - *setup_azure_login
+    - *setup_terraform
+  script:
+    - cd terraform
+    - terraform init -backend-config="resource_group_name=$TFSTATE_RG" -backend-config="storage_account_name=$TFSTATE_SA" -backend-config="container_name=tfstate" -backend-config="key=zero-trust-aks.tfstate"
+    - terraform destroy -auto-approve
+  dependencies:
+    - cleanup_k8s_resources
+  only:
+    - main
