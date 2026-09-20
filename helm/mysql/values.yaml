@@ -1,0 +1,52 @@
+# Values for the upstream bitnami/mysql chart (same chart family the AWS
+# project used). Installed with:
+#   helm repo add bitnami https://charts.bitnami.com/bitnami
+#   helm install mysql bitnami/mysql -n data --create-namespace \
+#     --values helm/mysql/values.yaml \
+#     --set auth.rootPassword="$MYSQL_ROOT_PASSWORD" \
+#     --set auth.password="$MYSQL_PASSWORD"
+# (Passwords come from Key Vault via CI, never committed — see .gitlab-ci.yml)
+
+auth:
+  database: "appdb"
+  username: "appuser"
+  # rootPassword / password: passed with --set at install time, sourced
+  # from the sql/mysql-admin-password Key Vault secret in CI.
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: "premium-ssd-managed-csi"
+    size: 8Gi
+
+  # No LoadBalancer, no NodePort — ClusterIP only. This IS the "Phase 1
+  # hardening" for MySQL: it was never a PaaS resource with a public Azure
+  # endpoint, so there's no Private Endpoint to add; the equivalent fix is
+  # making sure it never gets a public IP at the Kubernetes Service layer
+  # either, and restricting who can even reach port 3306 in-cluster (see
+  # the NetworkPolicy shipped with the nginx chart, which is the only thing
+  # explicitly allowed to talk to this Service).
+  service:
+    type: ClusterIP
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  podSecurityContext:
+    enabled: true
+    runAsNonRoot: true
+    runAsUser: 1001
+
+  containerSecurityContext:
+    enabled: true
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: false # mysql needs to write to its data dir; the PVC is the intentional exception
+
+metrics:
+  enabled: true # feeds the same Prometheus pattern used in the AWS/GCP projects
