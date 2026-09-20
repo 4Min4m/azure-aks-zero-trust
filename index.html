@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zero-Trust AKS Platform — Amin Amini</title>
 <meta name="description" content="A private, identity-first Azure Kubernetes platform with a cryptographically tamper-evident audit ledger.">
+
+<!-- Open Graph / social preview -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Zero-Trust AKS Platform — Amin Amini">
+<meta property="og:description" content="A private, identity-first Azure Kubernetes platform with a cryptographically tamper-evident audit ledger.">
+<meta property="og:image" content="https://aminam.netlify.app/og-preview.png">
+<meta property="og:url" content="https://aminam.netlify.app/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Zero-Trust AKS Platform — Amin Amini">
+<meta name="twitter:description" content="A private, identity-first Azure Kubernetes platform with a cryptographically tamper-evident audit ledger.">
+<meta name="twitter:image" content="https://aminam.netlify.app/og-preview.png">
+
+<!-- Favicon: inline SVG monogram, no extra file needed -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2310131a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='700' fill='%234fa8ff' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -154,6 +169,9 @@
     text-overflow:ellipsis;
     min-width:0;
   }
+  @media (max-width:520px){
+    .term-bar .title{ font-size:11px; }
+  }
   .term pre{
     margin:0;
     padding:20px;
@@ -278,6 +296,8 @@
   .foot-links{ display:flex; gap:22px; flex-wrap:wrap; font-family:var(--mono); font-size:14px; }
   footer .who{ color:var(--text-dim); font-size:14px; }
   footer .who b{ color:var(--text); font-weight:600; }
+  footer .license{ color:var(--text-dim); font-family:var(--mono); font-size:12.5px; margin-top:24px; }
+  footer .license a{ color:var(--text-dim); text-decoration:underline; }
 </style>
 </head>
 <body>
@@ -305,13 +325,13 @@
           policy enforcement to the audit trail itself.
         </p>
         <div class="cta-row">
-          <a class="btn primary" href="#" data-placeholder="https://github.com/4Min4m/azure-aks-zero-trust">View the code</a>
+          <a class="btn primary" href="https://github.com/4Min4m/azure-aks-zero-trust" target="_blank" rel="noopener">View the code</a>
         </div>
       </div>
 
       <div class="term" aria-label="Terminal output demonstrating policy enforcement and tamper detection">
         <div class="term-bar">
-          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
           <span class="title">zero-trust-aks — live checks</span>
         </div>
         <pre><span class="prompt">$</span> <span class="cmd">kubectl run bad-pod --image=nginx --dry-run=server</span>
@@ -433,27 +453,27 @@ aks-system-12345678-1     Ready    &lt;none&gt;</span><span class="caret"></span
 
       <div class="checklist">
         <div class="check-item">
-          <span class="stamp">✓</span>
+          <span class="stamp" aria-hidden="true">✓</span>
           <p>No public API server<span>Private cluster — not IP-restricted, genuinely absent from the internet</span></p>
         </div>
         <div class="check-item">
-          <span class="stamp">✓</span>
+          <span class="stamp" aria-hidden="true">✓</span>
           <p>No static cluster credentials<span>Local accounts disabled; access is Entra ID or ARM-mediated only</span></p>
         </div>
         <div class="check-item">
-          <span class="stamp">✓</span>
+          <span class="stamp" aria-hidden="true">✓</span>
           <p>No public data-plane endpoints<span>SQL, Storage, and Key Vault reachable only via Private Endpoint</span></p>
         </div>
         <div class="check-item">
-          <span class="stamp">✓</span>
+          <span class="stamp" aria-hidden="true">✓</span>
           <p>No long-lived pod secrets<span>Workload Identity issues short-lived, auto-rotated tokens</span></p>
         </div>
         <div class="check-item">
-          <span class="stamp">✓</span>
+          <span class="stamp" aria-hidden="true">✓</span>
           <p>No un-pinned container images<span>Policy-enforced allowed registries, resource limits, no <code>:latest</code></span></p>
         </div>
         <div class="check-item">
-          <span class="stamp">✓</span>
+          <span class="stamp" aria-hidden="true">✓</span>
           <p>Tamper-evident, not just tamper-logged<span>SQL Ledger detects — with proof — not just records</span></p>
         </div>
       </div>
@@ -480,18 +500,18 @@ aks-system-12345678-1     Ready    &lt;none&gt;</span><span class="caret"></span
   </section>
 
   <footer>
-    <div class="wrap foot-grid">
-      <div class="who"><b>Amin Amini</b> — DevOps &amp; Platform Engineer</div>
-      <div class="foot-links">
-        <a href="#" data-placeholder="https://github.com/4Min4m">GitHub</a>
-        <a href="#" data-placeholder="https://www.linkedin.com/in/mohammad-amin-amini">LinkedIn</a>
-        <a href="#" data-placeholder="https://aminam.netlify.app/">Website</a>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="who"><b>Amin Amini</b> — DevOps &amp; Platform Engineer</div>
+        <div class="foot-links">
+          <a href="https://github.com/4Min4m" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.linkedin.com/in/mohammad-amin-amini" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://aminam.netlify.app/" target="_blank" rel="noopener">Website</a>
+        </div>
       </div>
+      <p class="license">Released under the <a href="https://github.com/4Min4m/azure-aks-zero-trust/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>.</p>
     </div>
   </footer>
 
-<script>
-  document.documentElement.classList.add('js');
-</script>
 </body>
 </html>
