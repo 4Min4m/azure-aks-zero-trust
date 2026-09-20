@@ -1,0 +1,46 @@
+replicaCount: 2
+
+image:
+  # nginxinc/nginx-unprivileged, not plain nginx: the stock nginx image
+  # binds port 80, which needs root or CAP_NET_BIND_SERVICE. Since the pod
+  # policy below runs as a non-root UID with all capabilities dropped, we
+  # use the unprivileged variant, which listens on 8080 out of the box —
+  # no custom nginx.conf needed to satisfy the security context.
+  repository: nginxinc/nginx-unprivileged
+  # Pinned explicitly — required by both the Azure Policy "allowed images"
+  # assignment and the custom deny-latest-tag Gatekeeper constraint.
+  tag: "1.27-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  # Internal only: annotated as an internal Azure Load Balancer so it never
+  # gets a public IP. If you later want public demo access, front this with
+  # Azure Application Gateway + WAF instead of flipping this to a public LB
+  # — that keeps the "no public LB" zero-trust property intact and adds a
+  # single, inspectable ingress point instead.
+  type: LoadBalancer
+  port: 80
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 101 # nginx's own non-root user in the official alpine image
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+podSecurityContext:
+  fsGroup: 101
+
+networkPolicy:
+  enabled: true
