@@ -1,0 +1,15 @@
+# Premium SSD storage class for the in-cluster MySQL StatefulSet — the
+# direct Azure equivalent of the "MySQL + Premium SSD" stateful workload
+# from the resume bullet. `disk.csi.azure.com` is the Azure Disk CSI driver
+# (preinstalled on AKS); Premium_LRS is Azure's Premium SSD disk tier.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: premium-ssd-managed-csi
+provisioner: disk.csi.azure.com
+parameters:
+  skuName: Premium_LRS
+  cachingMode: ReadOnly
+reclaimPolicy: Retain   # deliberate: losing a PVC shouldn't silently delete a payments-adjacent database's disk
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer
