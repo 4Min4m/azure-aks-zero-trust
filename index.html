@@ -208,38 +208,23 @@
   .sec-head h2{ font-size:26px; color:#fff; }
   .sec-head p{ margin-top:12px; }
 
-  /* ---------- placeholder box ---------- */
-  .placeholder{
-    position:relative;
-    border:1px dashed #3a4159;
+  /* ---------- media (diagram, demo clip) ---------- */
+  .media{ margin:0; }
+  .media img, .media video{
+    display:block;
+    width:100%;
+    height:auto;
+    border:1px solid var(--line);
     border-radius:6px;
-    background:
-      repeating-linear-gradient(135deg, rgba(79,168,255,.04) 0 10px, transparent 10px 20px),
-      var(--panel);
-    min-height:280px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:32px;
+    background:var(--bg);
   }
-  .placeholder::before, .placeholder::after{
-    content:"";
-    position:absolute;
-    width:18px; height:18px;
-    border:2px solid var(--blue);
-    opacity:.55;
-  }
-  .placeholder::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
-  .placeholder::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
-
-  .placeholder .ph-label{
+  .media a:hover img{ border-color:var(--blue); }
+  .media figcaption{
+    margin-top:12px;
     font-family:var(--mono);
-    font-size:13px;
+    font-size:12.5px;
     color:var(--text-dim);
-    max-width:44ch;
   }
-  .placeholder .ph-label b{ color:var(--text); display:block; margin-bottom:6px; font-weight:600; }
 
   /* ---------- proof list ---------- */
   .proof{ border-top:1px solid var(--line); }
@@ -360,18 +345,17 @@ aks-system-12345678-1     Ready    &lt;none&gt;</span><span class="caret"></span
         <h2>How it's put together</h2>
         <p>One VNet, a private AKS cluster, and three PaaS services — SQL,
           Storage, Key Vault — each reachable only through a Private
-          Endpoint. Nothing in this diagram has a public IP.</p>
+          Endpoint. Nothing accepts inbound traffic from the internet; the
+          only public IP is the NAT gateway's egress address.</p>
       </div>
 
-      <div class="placeholder" style="min-height:420px;">
-        <div class="ph-label">
-          <b>Add your architecture diagram here</b>
-          Export the diagram from the README (or redraw it in Excalidraw /
-          draw.io) as a PNG or SVG and swap it in for this box —
-          <code>&lt;img src="architecture.png" alt="Architecture diagram"&gt;</code>.
-          Recommended size: ~1400px wide, dark background to match the page.
-        </div>
-      </div>
+      <figure class="media">
+        <a href="assets/architecture.png" target="_blank" rel="noopener" title="Open full-size diagram">
+          <img src="assets/architecture.png" width="1200" height="800" loading="lazy"
+               alt="Architecture diagram: Codespaces and CI reach the private AKS cluster only through Azure Resource Manager (az aks command invoke); there is no network path to the API server. Inside one VNet, the AKS node subnet runs the apps, data and workload-identity-demo namespaces, and a private-endpoint subnet connects to Azure SQL Ledger, Storage and Key Vault, all with public network access disabled. Entra ID handles cluster RBAC and workload identity federation; egress leaves through a NAT gateway.">
+        </a>
+        <figcaption>Click to open full size · source: <code>assets/architecture.svg</code></figcaption>
+      </figure>
     </div>
   </section>
 
@@ -430,16 +414,15 @@ aks-system-12345678-1     Ready    &lt;none&gt;</span><span class="caret"></span
           matching. Both are reproducible from the scripts in the repo.</p>
       </div>
 
-      <div class="placeholder" style="min-height:340px;">
-        <div class="ph-label">
-          <b>Add a screen recording of the demo here</b>
-          A 20–40s clip (or a few screenshots) running
-          <code>sql/05_engine_level_tamper_attempt.sql</code> and
-          <code>sql/06_verify_with_corrupted_digest.sql</code> and showing the
-          resulting errors is the single most convincing thing on this page —
-          swap this box for a <code>&lt;video&gt;</code> or an animated GIF.
-        </div>
-      </div>
+      <figure class="media">
+        <video controls muted playsinline preload="metadata" width="1280" height="720"
+               poster="assets/ledger-demo-poster.jpg"
+               aria-label="Terminal walkthrough: three direct edits to the ledger history are refused, a clean digest verifies, and a corrupted digest fails verification at block 0.">
+          <source src="assets/ledger-demo.mp4" type="video/mp4">
+          <a href="assets/ledger-demo.mp4">Download the demo clip (MP4, 37 s)</a>
+        </video>
+        <figcaption>37 s replay of <code>sql/05</code> → <code>sql/04</code> → <code>sql/06</code>: prevent, verify, detect.</figcaption>
+      </figure>
     </div>
   </section>
 
