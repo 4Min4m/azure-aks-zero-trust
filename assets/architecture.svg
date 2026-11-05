@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-labelledby="t d">
+<title id="t">Zero-trust AKS platform architecture</title>
+<desc id="d">A private AKS cluster and three PaaS services (Azure SQL Ledger, Storage, Key Vault) inside one VNet, reachable only through Private Endpoints. Operators and CI reach the cluster through Azure Resource Manager with az aks command invoke; there is no network path to the API server. Egress goes out through a NAT gateway.</desc>
+<defs>
+<marker id="ab" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4fa8ff"/></marker>
+<marker id="ac" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c98a3d"/></marker>
+<marker id="ad" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b93a7"/></marker>
+<marker id="ar" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e2574c"/></marker>
+<marker id="ag" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7fd99a"/></marker>
+<pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="10" stroke="#4fa8ff" stroke-opacity="0.05" stroke-width="5"/></pattern>
+</defs>
+<rect x="0" y="0" width="1200" height="800" rx="0" fill="#10131a" stroke="none" stroke-width="1.2"/>
+<text x="28" y="40" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="600" fill="#c98a3d" text-anchor="start" letter-spacing="1.5">OUTSIDE THE VNET</text>
+<rect x="28" y="58" width="222" height="92" rx="6" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<rect x="28" y="58" width="4" height="92" rx="2" fill="#8b93a7"/>
+<text x="44" y="84" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" font-weight="600" fill="#e8eaf0" text-anchor="start">Codespaces / CI</text>
+<text x="44" y="106" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">GitLab CI · dev box</text>
+<text x="44" y="125" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">no VNet access</text>
+<rect x="28" y="250" width="222" height="92" rx="6" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<rect x="28" y="250" width="4" height="92" rx="2" fill="#4fa8ff"/>
+<text x="44" y="276" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" font-weight="600" fill="#e8eaf0" text-anchor="start">Azure Resource Mgr</text>
+<text x="44" y="298" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">public control plane</text>
+<text x="44" y="317" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">RBAC-gated · audited</text>
+<rect x="28" y="452" width="222" height="112" rx="6" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<rect x="28" y="452" width="4" height="112" rx="2" fill="#7fd99a"/>
+<text x="44" y="478" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" font-weight="600" fill="#e8eaf0" text-anchor="start">Entra ID</text>
+<text x="44" y="500" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">cluster RBAC (no local</text>
+<text x="44" y="519" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">accounts) · workload</text>
+<text x="44" y="538" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">identity federation</text>
+<text x="28" y="650" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">Nothing here accepts</text>
+<text x="28" y="670" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">inbound traffic from the</text>
+<text x="28" y="690" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">internet. The only public</text>
+<text x="28" y="710" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">IP is the NAT gateway&#x27;s</text>
+<text x="28" y="730" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">egress address.</text>
+<path d="M139.0,150 L139.0,246" fill="none" stroke="#4fa8ff" stroke-width="1.8" marker-end="url(#ab)" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="149.0" y="196" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#4fa8ff" text-anchor="start">az aks</text>
+<text x="149.0" y="212" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#4fa8ff" text-anchor="start">command invoke</text>
+<rect x="286" y="16" width="890" height="768" rx="10" fill="none" stroke="#3a4159" stroke-width="1.2" stroke-dasharray="6 6"/>
+<text x="304" y="33" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">rg-ztaks-demo</text>
+<text x="1158" y="33" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="end">terraform · westeurope</text>
+<rect x="306" y="46" width="590" height="712" rx="8" fill="url(#hatch)" stroke="#4fa8ff" stroke-width="1.4"/>
+<rect x="306" y="46" width="590" height="712" rx="8" fill="#171b24" fill-opacity="0.55"/>
+<text x="324" y="74" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600" fill="#4fa8ff" text-anchor="start">VNet  10.20.0.0/16</text>
+<rect x="322" y="90" width="558" height="416" rx="6" fill="#171b24" stroke="#2a3040" stroke-width="1.2" stroke-dasharray="4 4"/>
+<text x="336" y="114" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">snet-aks-nodes  10.20.1.0/24</text>
+<text x="866" y="114" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="end">NSG: deny inbound Internet</text>
+<rect x="338" y="126" width="526" height="364" rx="6" fill="#1d2230" stroke="#4fa8ff" stroke-width="1.6"/>
+<text x="356" y="158" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="600" fill="#e8eaf0" text-anchor="start">AKS · private cluster</text>
+<text x="846" y="158" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="end">Standard tier</text>
+<rect x="356" y="176" width="153" height="24" rx="12" fill="#4fa8ff" fill-opacity="0.10" stroke="#4fa8ff" stroke-opacity="0.55"/>
+<text x="365" y="192.5" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#4fa8ff" text-anchor="start">private API server</text>
+<rect x="517.0" y="176" width="153" height="24" rx="12" fill="#4fa8ff" fill-opacity="0.10" stroke="#4fa8ff" stroke-opacity="0.55"/>
+<text x="526.0" y="192.5" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#4fa8ff" text-anchor="start">local accounts off</text>
+<rect x="678.0" y="176" width="93" height="24" rx="12" fill="#7fd99a" fill-opacity="0.10" stroke="#7fd99a" stroke-opacity="0.55"/>
+<text x="687.0" y="192.5" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#7fd99a" text-anchor="start">Entra RBAC</text>
+<rect x="356" y="208" width="206" height="24" rx="12" fill="#c98a3d" fill-opacity="0.10" stroke="#c98a3d" stroke-opacity="0.55"/>
+<text x="365" y="224.5" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#c98a3d" text-anchor="start">Azure Policy + Gatekeeper</text>
+<rect x="569.5" y="208" width="168" height="24" rx="12" fill="#8b93a7" fill-opacity="0.10" stroke="#8b93a7" stroke-opacity="0.55"/>
+<text x="578.5" y="224.5" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">CNI overlay + Calico</text>
+<rect x="356.0" y="250" width="156.66666666666666" height="226" rx="5" fill="#10131a" stroke="#3a4159" stroke-width="1.2"/>
+<text x="368.0" y="272" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#8b93a7" text-anchor="start">namespace</text>
+<text x="368.0" y="291" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600" fill="#c98a3d" text-anchor="start">apps</text>
+<rect x="366.0" y="326" width="136.66666666666666" height="34" rx="4" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<text x="378.0" y="348" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="600" fill="#e8eaf0" text-anchor="start">nginx ×2</text>
+<text x="368.0" y="384" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">unprivileged image</text>
+<text x="368.0" y="403" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">internal LB only</text>
+<text x="368.0" y="422" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">default-deny</text>
+<text x="368.0" y="441" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">NetworkPolicy</text>
+<rect x="522.6666666666666" y="250" width="156.66666666666666" height="226" rx="5" fill="#10131a" stroke="#3a4159" stroke-width="1.2"/>
+<text x="534.6666666666666" y="272" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#8b93a7" text-anchor="start">namespace</text>
+<text x="534.6666666666666" y="291" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600" fill="#c98a3d" text-anchor="start">data</text>
+<rect x="532.6666666666666" y="326" width="136.66666666666666" height="34" rx="4" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<text x="544.6666666666666" y="348" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="600" fill="#e8eaf0" text-anchor="start">mysql</text>
+<text x="534.6666666666666" y="384" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">StatefulSet</text>
+<text x="534.6666666666666" y="403" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">Premium SSD PVC</text>
+<text x="534.6666666666666" y="422" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">ClusterIP only</text>
+<text x="534.6666666666666" y="441" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">no public IP</text>
+<rect x="689.3333333333333" y="250" width="156.66666666666666" height="226" rx="5" fill="#10131a" stroke="#3a4159" stroke-width="1.2"/>
+<text x="701.3333333333333" y="272" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11.5" font-weight="400" fill="#8b93a7" text-anchor="start">namespace</text>
+<text x="701.3333333333333" y="291" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600" fill="#c98a3d" text-anchor="start">workload-identity</text>
+<text x="701.3333333333333" y="308" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13.5" font-weight="600" fill="#c98a3d" text-anchor="start">-demo</text>
+<rect x="699.3333333333333" y="326" width="136.66666666666666" height="34" rx="4" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<text x="711.3333333333333" y="348" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="600" fill="#e8eaf0" text-anchor="start">blob-reader</text>
+<text x="701.3333333333333" y="384" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">Job using a</text>
+<text x="701.3333333333333" y="403" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">federated OIDC</text>
+<text x="701.3333333333333" y="422" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">token: zero</text>
+<text x="701.3333333333333" y="441" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">stored secrets</text>
+<path d="M250,296 C 290,296 300,250 334,250" fill="none" stroke="#4fa8ff" stroke-width="2" marker-end="url(#ab)" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M250,104 L316,104" fill="none" stroke="#e2574c" stroke-width="1.6" stroke-dasharray="5 5" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="292.0" cy="104" r="11" fill="#10131a" stroke="#e2574c" stroke-width="1.6"/>
+<path d="M287.0,99 L297.0,109 M297.0,99 L287.0,109" fill="none" stroke="#e2574c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M250,508 C 300,508 300,470 334,470" fill="none" stroke="#7fd99a" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#ag)" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="28" y="590" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#7fd99a" text-anchor="start">OIDC token exchange</text>
+<rect x="322" y="522" width="558" height="226" rx="6" fill="#171b24" stroke="#2a3040" stroke-width="1.2" stroke-dasharray="4 4"/>
+<text x="336" y="546" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">snet-private-endpoints  10.20.2.0/24</text>
+<rect x="336" y="560" width="530" height="44" rx="4" fill="#1d2230" stroke="#c98a3d" stroke-width="1"/>
+<text x="350" y="587" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="600" fill="#c98a3d" text-anchor="start">pe-sql-ledger</text>
+<text x="852" y="587" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="end">privatelink.database.windows.net</text>
+<rect x="336" y="622" width="530" height="44" rx="4" fill="#1d2230" stroke="#c98a3d" stroke-width="1"/>
+<text x="350" y="649" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="600" fill="#c98a3d" text-anchor="start">pe-blob</text>
+<text x="852" y="649" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="end">privatelink.blob.core.windows.net</text>
+<rect x="336" y="684" width="530" height="44" rx="4" fill="#1d2230" stroke="#c98a3d" stroke-width="1"/>
+<text x="350" y="711" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="600" fill="#c98a3d" text-anchor="start">pe-kv</text>
+<text x="852" y="711" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="end">privatelink.vaultcore.azure.net</text>
+<path d="M601.0,490 L601.0,518" fill="none" stroke="#c98a3d" stroke-width="2" marker-end="url(#ac)" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="611.0" y="515" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#c98a3d" text-anchor="start">private IPs only</text>
+<text x="924" y="104" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="600" fill="#c98a3d" text-anchor="start" letter-spacing="1.5">EGRESS</text>
+<text x="924" y="516" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="600" fill="#c98a3d" text-anchor="start" letter-spacing="1.5">PAAS</text>
+<text x="924" y="535" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">public network access: off</text>
+<rect x="924" y="116" width="232" height="92" rx="6" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<rect x="924" y="116" width="4" height="92" rx="2" fill="#e2574c"/>
+<text x="940" y="142" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16" font-weight="600" fill="#e8eaf0" text-anchor="start">NAT gateway</text>
+<text x="940" y="164" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">static egress IP</text>
+<text x="940" y="183" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">→ internet (image pulls)</text>
+<path d="M880,164 L920,164" fill="none" stroke="#e2574c" stroke-width="1.6" marker-end="url(#ar)" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="924" y="248" width="232" height="186" rx="6" fill="#10131a" stroke="#2a3040" stroke-width="1.2"/>
+<text x="938" y="272" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#8b93a7" text-anchor="start">legend</text>
+<path d="M938,294 L970,294" fill="none" stroke="#4fa8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="980" y="298" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#e8eaf0" text-anchor="start">admin / control path</text>
+<path d="M938,321 L970,321" fill="none" stroke="#c98a3d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="980" y="325" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#e8eaf0" text-anchor="start">private data path</text>
+<path d="M938,348 L970,348" fill="none" stroke="#7fd99a" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="980" y="352" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#e8eaf0" text-anchor="start">identity / tokens</text>
+<path d="M938,375 L970,375" fill="none" stroke="#e2574c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="980" y="379" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#e8eaf0" text-anchor="start">egress only</text>
+<path d="M938,402 L970,402" fill="none" stroke="#e2574c" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="980" y="406" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" font-weight="400" fill="#e8eaf0" text-anchor="start">blocked: no route</text>
+<rect x="924" y="554" width="232" height="56" rx="6" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<rect x="924" y="554" width="4" height="56" rx="2" fill="#c98a3d"/>
+<text x="940" y="578" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600" fill="#e8eaf0" text-anchor="start">Azure SQL · Ledger</text>
+<text x="940" y="598" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">payments-audit-ledger</text>
+<rect x="924" y="616" width="232" height="56" rx="6" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<rect x="924" y="616" width="4" height="56" rx="2" fill="#c98a3d"/>
+<text x="940" y="640" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600" fill="#e8eaf0" text-anchor="start">Storage account</text>
+<text x="940" y="660" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">no shared keys</text>
+<rect x="924" y="678" width="232" height="56" rx="6" fill="#1d2230" stroke="#3a4159" stroke-width="1.2"/>
+<rect x="924" y="678" width="4" height="56" rx="2" fill="#c98a3d"/>
+<text x="940" y="702" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="15" font-weight="600" fill="#e8eaf0" text-anchor="start">Key Vault</text>
+<text x="940" y="722" font-family="'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#8b93a7" text-anchor="start">RBAC · admin secrets</text>
+<path d="M866,582 L920,582" fill="none" stroke="#c98a3d" stroke-width="1.8" marker-end="url(#ac)" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M866,644 L920,644" fill="none" stroke="#c98a3d" stroke-width="1.8" marker-end="url(#ac)" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M866,706 L920,706" fill="none" stroke="#c98a3d" stroke-width="1.8" marker-end="url(#ac)" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
